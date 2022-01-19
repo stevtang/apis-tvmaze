@@ -19,11 +19,11 @@ async function getShowsByTerm(term) {
     params: { q: term },
   });
   console.log("response: ", response);
-  let showInfo = [];
+  let showInfo = []; //!!Change name into shows
 
   //Iterate through each show object to get necessary data and store in new object which will go to array.
   for (let showIndex in response.data) {
-    let showObject = {};
+    let showObject = {}; 
     showObject["id"] = response.data[showIndex].show.id;
     showObject["name"] = response.data[showIndex].show.name;
     showObject["summary"] = response.data[showIndex].show.summary;
