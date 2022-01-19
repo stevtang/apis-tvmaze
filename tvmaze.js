@@ -2,6 +2,7 @@
 
 const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
+const $episodeList = ${"#episdoesList"}
 const $searchForm = $("#searchForm");
 const TVMAZE_BASEURL = 'http://api.tvmaze.com/';
 const MISSING_URL = `https://tinyurl.com/tv-missing`;
@@ -78,10 +79,12 @@ function populateShows(shows) {
 async function searchForShowAndDisplay() {
   const term = $("#searchForm-term").val();
   const shows = await getShowsByTerm(term);
-
+  
   $episodesArea.hide();
 
   populateShows(shows);
+
+
 }
 
 /** Once button 'search' is clicked, shows will be searched and displayed. */
@@ -94,8 +97,37 @@ $searchForm.on("submit", async function (evt) {
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
+async function getEpisodesOfShow(id) {
+  let response = await axios.get(`http://api.tvmaze.com/shows/${id}/episodes`);
+
+  return response.data.map(episode => ({
+    id: episode.id,
+    name: episode.name,
+    season: episode.season,
+    number: episode.number,
+  }))
+ }
 
 /** Write a clear docstring for this function... */
 
-// function populateEpisodes(episodes) { }
+function populateEpisodes(episodes) {
+  $episodeList.empty();
+  for(episode of episodes){
+  const $episodeData = $(
+    `<li>
+    ${episode.name}
+    (season ${episode.season}, number ${episode.number})
+   </li>`);
+
+   $episodeList.append($episodeData);
+  }
+
+  $episodesArea.show();
+
+ }
+
+ async function getDisplayEpisodes(evt){
+   
+
+  const episodes = await getEpisodesOfShow(id);
+ }
