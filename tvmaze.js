@@ -2,7 +2,7 @@
 
 const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
-const $episodeList = $("#episdoesList");
+const $episodeList = $("#episodesList");
 const $searchForm = $("#searchForm");
 const TVMAZE_BASEURL = 'http://api.tvmaze.com/';
 const MISSING_URL = `https://tinyurl.com/tv-missing`;
@@ -20,11 +20,11 @@ async function getShowsByTerm(term) {
     params: { q: term },
   });
   console.log("response: ", response);
-  let showInfo = []; //!!Change name into shows
+  let shows = []; 
 
   //Iterate through each show object to get necessary data and store in new object which will go to array.
   for (let showIndex in response.data) {
-    let showObject = {}; 
+    let showObject = {};
     showObject["id"] = response.data[showIndex].show.id;
     showObject["name"] = response.data[showIndex].show.name;
     showObject["summary"] = response.data[showIndex].show.summary;
@@ -37,9 +37,9 @@ async function getShowsByTerm(term) {
     }
 
     console.log("showObject: ", showObject);
-    showInfo.push(showObject);
+    shows.push(showObject);
   }
-  return showInfo;
+  return shows;
 }
 
 /** Given list of shows, create markup for each and to DOM */
@@ -79,7 +79,7 @@ function populateShows(shows) {
 async function searchForShowAndDisplay() {
   const term = $("#searchForm-term").val();
   const shows = await getShowsByTerm(term);
-  
+
   $episodesArea.hide();
 
   populateShows(shows);
@@ -97,42 +97,47 @@ $searchForm.on("submit", async function (evt) {
  */
 
 async function getEpisodesOfShow(id) {
-  let response = await axios.get(`http://api.tvmaze.com/shows/${id}/episodes`);
+  let response = await axios.get(`${TVMAZE_BASEURL}shows/${id}/episodes`);
 
+  //Iterate through every episodes and get their data for object inside array.
   return response.data.map(episode => ({
     id: episode.id,
     name: episode.name,
     season: episode.season,
     number: episode.number,
   }))
- }
+}
 
 /** Write a clear docstring for this function... */
-
+/**Given array of episode objects, add list of episodes with information to DOM and show. */
 function populateEpisodes(episodes) {
   $episodeList.empty();
-  for(episode of episodes){
-  const $episodeData = $(
-    `<li>
+
+  for (let episode of episodes) {
+    const $episodeData = $(
+      `<li>
     ${episode.name}
     (season ${episode.season}, number ${episode.number})
    </li>`);
 
-   $episodeList.append($episodeData);
+    $episodeList.append($episodeData);
   }
 
   $episodesArea.show();
 
- }
+}
 
 
+/**Retrieve show id from Show class div, get episodes, 
+ * and list them when "Episode" button is clicked. */
+async function getDisplayEpisodes(evt) {
 
- async function getDisplayEpisodes(evt){
-  
-  const id = $(evt.target).closest("data-show-id").data();
-  console.log("data-show-id: ", id );
+  const id = $(evt.target).closest(".Show").data("show-id");
+
   const episodes = await getEpisodesOfShow(id);
-  
- }
 
- $showsList.on("click", ".Show-getEpisodes", getDisplayEpisodes);
+  populateEpisodes(episodes);
+
+}
+
+$showsList.on("click", ".Show-getEpisodes", getDisplayEpisodes);
